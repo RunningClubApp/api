@@ -8,7 +8,7 @@ const helmet = require('helmet')
 // var passport = require('./bin/passport')()
 const jwt = require('./bin/jwt')
 
-// cconst indexRouter = require('./routes/index')()
+const leagueRouter = require('./routes/LeagueRouter')()
 // const usersRouter = require('./routes/users')()
 // const conversationsRouter = require('./routes/conversations')()
 // const reportsRouter = require('./routes/reports')()
@@ -59,6 +59,7 @@ app.use(express.urlencoded({ extended: false }))
 
 
 // app.use('/', indexRouter)
+app.use('/leagues', leagueRouter)
 // app.use('/auth', authRouter)
 // app.use('/users', usersRouter)
 // app.use('/conversations', conversationsRouter)
@@ -80,7 +81,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500)
   
   if (req.app.get('env') !== 'production') {
-    debug(err)
+    console.log(err)
     res.json({ status: 500, reason: err })
   } else {
     res.json({ status: err.status || 500 })

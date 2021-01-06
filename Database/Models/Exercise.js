@@ -7,7 +7,7 @@ const exerciseSchema = new Schema({
     coords: {
       lat: { type: Number, required: true },
       lng: { type: Number, required: true }
-    }
+    },
     elevation: { type: Number, required: true },
     timestamp: { type: Date, required: true }
   }],

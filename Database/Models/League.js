@@ -1,9 +1,11 @@
-import mongoose from 'mongoose';
-const { Schema } = mongoose;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = mongoose.Types.ObjectId
 
 const leagueSchema = new Schema({
   title: { type: String, required: true, maxlength: 16 },
-  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  creator: { type: ObjectId, ref: 'User' },
+  participants: [{ type: ObjectId, ref: 'User' }],
   league_length: {
     type: String,
     default: ['Weekly','Monthly', 'Quaterly', 'Yearly']
@@ -12,8 +14,22 @@ const leagueSchema = new Schema({
     start_date: { type: Date }
   },
   history: [{
-    winner: { type: Schema.Types.ObjectId, ref: 'User' }
-  }]
+    winner: { type: ObjectId, ref: 'User' }
+  }],
+  private: { type: Boolean, default: true },
+  invited_users: [{ type: ObjectId, ref: 'User' }]
 })
 
-exports.module = mongoose.model('League', leagueSchema);
+leagueSchema.statics.testValidate = function(league) {
+  return new Promise((resolve, reject) => {
+      const leagueObj = new this(league)
+
+      leagueObj.validate((err) => {
+          if (err) return reject(err)
+
+          resolve(leagueObj)
+      } )
+  })
+}
+
+module.exports = mongoose.model('League', leagueSchema);
