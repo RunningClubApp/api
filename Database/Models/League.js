@@ -8,7 +8,7 @@ const leagueSchema = new Schema({
   participants: [{ type: ObjectId, ref: 'User' }],
   league_length: {
     type: String,
-    default: ['Weekly','Monthly', 'Quaterly', 'Yearly']
+    default: ['Weekly', 'Monthly', 'Quaterly', 'Yearly']
   },
   timestamps: {
     start_date: { type: Date }
@@ -20,16 +20,16 @@ const leagueSchema = new Schema({
   invited_users: [{ type: ObjectId, ref: 'User' }]
 })
 
-leagueSchema.statics.testValidate = function(league) {
+leagueSchema.statics.testValidate = function (league) {
   return new Promise((resolve, reject) => {
-      const leagueObj = new this(league)
+    const leagueObj = new this(league)
 
-      leagueObj.validate((err) => {
-          if (err) return reject(err)
+    leagueObj.validate((err) => {
+      if (err) return reject(err)
 
-          resolve(leagueObj)
-      } )
+      resolve(leagueObj)
+    })
   })
 }
 
-module.exports = mongoose.model('League', leagueSchema);
+module.exports = mongoose.model('League', leagueSchema)

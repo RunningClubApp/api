@@ -1,6 +1,6 @@
 ---
-name: Feature name
-about: Quick Brief on feature
+name: New Feature
+about: An issue for a new feature
 title: ''
 labels: ''
 assignees: ''

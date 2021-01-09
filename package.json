@@ -17,9 +17,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node bin/www",
+    "start": "standard --fix && node bin/www",
     "docs": "jsdoc -c jsdoc.config.json",
-    "test": "mocha ./test/**/*.test.js"
+    "test": "mocha ./test/**/*.test.js",
+    "lint": "standard --fix"
   },
   "repository": {
     "type": "git",
@@ -30,5 +31,10 @@
   "bugs": {
     "url": "https://github.com/RunningClubApp/api/issues"
   },
-  "homepage": "https://github.com/RunningClubApp/api#readme"
+  "homepage": "https://github.com/RunningClubApp/api#readme",
+  "standard": {
+    "ignore": [
+      "**/test/"
+    ]
+  }
 }

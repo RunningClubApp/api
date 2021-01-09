@@ -1,7 +1,7 @@
-const { expect,should } = require('chai')
+const { expect, should } = require('chai')
 
-var LeagueController = require('../../../Controllers/LeagueController')
-var ObjectId = require('mongoose').Types.ObjectId
+const LeagueController = require('../../../Controllers/LeagueController')
+const ObjectId = require('mongoose').Types.ObjectId
 
 LeagueController.vars.saveLeague = (league) => {
   return new Promise((resolve, reject) => {
@@ -9,19 +9,25 @@ LeagueController.vars.saveLeague = (league) => {
   })
 }
 
-describe('createLeague()', function() {
-  let id = ObjectId()
-  var tests = [
-    { name: 'Insert a league',
-      title: 'title', creator: id, league_length: 'Weekly',
+describe('createLeague()', function () {
+  const id = ObjectId()
+  const tests = [
+    {
+      name: 'Insert a league',
+      title: 'title',
+      creator: id,
+      league_length: 'Weekly',
       want: { title: 'title', creator: id, league_length: 'Weekly', participants: [id] },
-      shouldReject: false,
+      shouldReject: false
     },
-    { name: 'Rejects an invalid league',
-      title: 'this title is over 16 characters long', creator: id, league_length: 'Non enum',
+    {
+      name: 'Rejects an invalid league',
+      title: 'this title is over 16 characters long',
+      creator: id,
+      league_length: 'Non enum',
       want: { },
-      shouldReject: true,
-    },
+      shouldReject: true
+    }
   ]
 
   tests.forEach(function (test) {
@@ -43,5 +49,4 @@ describe('createLeague()', function() {
         })
     })
   })
-
 })

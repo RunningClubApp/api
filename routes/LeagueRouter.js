@@ -1,100 +1,74 @@
 const LeagueController = require('../Controllers/LeagueController')
 const express = require('express')
-const mongoose = require('mongoose')
+
+const OIDValidator = require('../Validators/ObjectIdValidator')
+const StrValidator = require('../Validators/StringValidator')
+const LLValidator = require('../Validators/LeagueLengthValidator')
 
 module.exports = () => {
   const router = express.Router()
 
-  router.post('/create', (req, res, next) => {
+  router.post('/create', async (req, res, next) => {
     // Read and validate params
     const title = req.query.ti
-    if (title === undefined) {
-      return res.status(400).json({ success: false, errors: { title: { missing: true } } })
+    let valid = StrValidator(title, { range: [1, 16], regex: /[a-zA-Z0-9]/ })
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { title: valid.errors } })
     }
-    if (title.length > 16 || title.length < 1) {
-      return res.status(400).json({ success: false, errors: { title: { invalid: true } } })
-    }
+
     const creator = req.query.usr
-    if (creator === undefined) {
-      return res.status(400).json({ success: false, errors: { creator: { missing: true } } })
-    }
-    if (!mongoose.Types.ObjectId.isValid(creator)) {
-      return res.status(400).json({ success: false, errors: { creator: { invalid: true } } })
+    valid = OIDValidator(creator)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { creator: valid.errors } })
     }
 
     const length = req.query.l
-    if (length === undefined) {
-      return res.status(400).json({ success: false, errors: { length: { missing: true } } })
+    valid = LLValidator(length)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { length: valid.errors } })
     }
-    if (!LeagueController.ValidateLeagueLength(length)){
-      return res.status(400).json({ success: false, errors: { length: { invalid: true } } })
-    }
-    
-    // Create the league
-    LeagueController.CreateLeague(title, creator, length)
-      .then((doc) => {
-        return res.json({success: true, league: doc})
-      })
-      .catch((err) => {
-        next(err)
-      })
 
+    // Create the league
+    const doc = await LeagueController.CreateLeague(title, creator, length).catch(err => next(err))
+    return res.json({ success: true, league: doc })
   })
 
-  router.patch('/join', (req, res, next) => {
+  router.patch('/join', async (req, res, next) => {
     // Read and validate params
     const user = req.query.usr
-    if (user === undefined) {
-      return res.status(400).json({ success: false, errors: { user: { missing: true } } })
-    }
-    if (!mongoose.Types.ObjectId.isValid(user)) {
-      return res.status(400).json({ success: false, errors: { user: { invalid: true } } })
+    let valid = OIDValidator(user)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { user: valid.errors } })
     }
 
     const league = req.query.lge
-    if (league === undefined) {
-      return res.status(400).json({ success: false, errors: { league: { missing: true } } })
-    }
-    if (!mongoose.Types.ObjectId.isValid(user)) {
-      return res.status(400).json({ success: false, errors: { league: { invalid: true } } })
+    valid = OIDValidator(league)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
     // Create the league
-    LeagueController.JoinLeague(league, user)
-      .then((doc) => {
-        return res.json({success: true, league: doc})
-      })
-      .catch((err) => {
-        next(err)
-      })
+    const doc = await LeagueController.JoinLeague(league, user).catch(err => next(err))
+    return res.json({ success: true, league: doc })
   })
 
-  router.patch('/invite', (req, res, next) => {
+  router.patch('/invite', async (req, res, next) => {
     // Read and validate params
     const user = req.query.usr
-    if (user === undefined) {
-      return res.status(400).json({ success: false, errors: { user: { missing: true } } })
-    }
-    if (!mongoose.Types.ObjectId.isValid(user)) {
-      return res.status(400).json({ success: false, errors: { user: { invalid: true } } })
+    let valid = OIDValidator(user)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { user: valid.errors } })
     }
 
     const league = req.query.lge
-    if (league === undefined) {
-      return res.status(400).json({ success: false, errors: { league: { missing: true } } })
-    }
-    if (!mongoose.Types.ObjectId.isValid(user)) {
-      return res.status(400).json({ success: false, errors: { league: { invalid: true } } })
+    valid = OIDValidator(league)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
     // Create the league
-    LeagueController.InviteToLeague(league, user)
-      .then((doc) => {
-        return res.json({success: true, league: doc})
-      })
-      .catch((err) => {
-        next(err)
-      })
+    const doc = await LeagueController.InviteToLeague(league, user).catch(err => next(err))
+    return res.json({ success: true, league: doc })
   })
 
   return router

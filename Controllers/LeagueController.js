@@ -1,4 +1,4 @@
-var League = require('../Database/Models/League')
+const League = require('../Database/Models/League')
 
 /**
  * @module LeagueController
@@ -9,14 +9,14 @@ module.exports = {
       return new Promise((resolve, reject) => {
         // if the league document already exists update it
         if (league._id) {
-          League.updateOne({_id: league._id}, league)
-          .exec((err, doc) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(doc)
-            }
-          })
+          League.updateOne({ _id: league._id }, league)
+            .exec((err, doc) => {
+              if (err) {
+                reject(err)
+              } else {
+                resolve(doc)
+              }
+            })
         } else { // otherwise save it
           league.save((err, doc) => {
             if (err) {
@@ -31,36 +31,41 @@ module.exports = {
     findSomeLeagues: (query) => {
       return new Promise((resolve, reject) => {
         League.find(query)
-        .exec((err, docs) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(docs)
-          }
-        })
+          .exec((err, docs) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(docs)
+            }
+          })
       })
     },
     findOneLeague: (query) => {
       return new Promise((resolve, reject) => {
         League.findOne(query)
-        .exec((err, docs) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(docs)
-          }
-        })
+          .exec((err, docs) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(docs)
+            }
+          })
+      })
+    },
+    deleteLeagueWithQuery: (query) => {
+      return new Promise((resolve, reject) => {
+        League.deleteOne(query)
+          .exec((err, res) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(res)
+            }
+          })
       })
     },
     rightNow: () => { return Date.now() }
   },
-
-  /**
-   * Returns true if input is a valid LeagueLength enum
-   * @param {string} input - The input string
-   * @return {boolean} whether the input is a valid league_length enum
-   */
-  ValidateLeagueLength: input => ['Weekly','Monthly', 'Quaterly', 'Yearly'].includes(input),
 
   /**
    * Creates a league document in the database
@@ -71,8 +76,7 @@ module.exports = {
    */
   CreateLeague: (title, creator, length) => {
     return new Promise((resolve, reject) => {
-
-      let league = {
+      const league = {
         title: title,
         creator: creator,
         participants: [creator],
@@ -84,54 +88,53 @@ module.exports = {
       }
 
       League.testValidate(league)
-      .then((l) => {
-        module.exports.vars.saveLeague(l)
-        .then(doc => resolve(doc))
-        .catch(err => reject(err))
-      })
-      .catch((err) => {
-        reject(err)
-      })
+        .then((l) => {
+          module.exports.vars.saveLeague(l)
+            .then(doc => resolve(doc))
+            .catch(err => reject(err))
+        })
+        .catch(() => {
+          reject(new Error('Error validating league document'))
+        })
     })
   },
 
   /**
    * Enters a user into a league
-   * @param {string} leagueID - The league to add to
+   * @param {string} leagueID - The league t o add to
    * @param {string} userID - The user to add to the league
    * @return {Promise} Promise resolving with the updated document
    */
   JoinLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneLeague({ _id: leagueID })
-      .then((doc) => {
-        if (doc) {
-          var index = doc.invited_users.indexOf(userID);
-          // if league is public, or user has been invited
-          if (!doc.private || index !== -1) {
+        .then((doc) => {
+          if (doc) {
+            const index = doc.invited_users.indexOf(userID)
+            // if league is public, or user has been invited
+            if (!doc.private || index !== -1) {
             // Update document
-            doc.participants.push(userID)
-            if (index !== -1) {
-              doc.invited_users.splice(index, 1);
+              doc.participants.push(userID)
+              if (index !== -1) {
+                doc.invited_users.splice(index, 1)
+              }
+
+              // Save document
+              module.exports.vars.saveLeague(doc)
+                .then((res) => {
+                  resolve(doc)
+                })
+                .catch(() => {
+                  reject(new Error(`Cannot save league ${leagueID}`))
+                })
+            } else {
+              reject(new Error(`user ${userID} cannot join league ${leagueID}`))
             }
-
-            // Save document
-            module.exports.vars.saveLeague(doc)
-            .then((res) => {
-              resolve(doc)
-            })
-            .catch((err) => {
-              reject(err)
-            })
-
-          } else {
-            reject(new Error(`user ${userID} cannot join league ${leagueID}`))
           }
-        }
-      })
-      .catch((err) => {
-        reject(err)
-      })
+        })
+        .catch(() => {
+          reject(new Error(`Error finding league document ${leagueID}`))
+        })
     })
   },
 
@@ -144,29 +147,28 @@ module.exports = {
   InviteToLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneLeague({ _id: leagueID })
-      .then((doc) => {
-        if (doc) {
-          var index = doc.invited_users.indexOf(userID);
-          if (index === -1) {
+        .then((doc) => {
+          if (doc) {
+            const index = doc.invited_users.indexOf(userID)
+            if (index === -1) {
             // Update document
-            doc.invited_users.push(userID)
-            // Save document
-            module.exports.vars.saveLeague(doc)
-            .then((res) => {
-              resolve(doc)
-            })
-            .catch((err) => {
-              console.log(err)
-              reject(new Error(`Error saving league document ${leagueID}`))
-            })
-          } else {
-            reject(new Error(`user ${userID} cannot be invited to ${leagueID}`))
+              doc.invited_users.push(userID)
+              // Save document
+              module.exports.vars.saveLeague(doc)
+                .then((res) => {
+                  resolve(doc)
+                })
+                .catch(() => {
+                  reject(new Error(`Error saving league document ${leagueID}`))
+                })
+            } else {
+              reject(new Error(`user ${userID} cannot be invited to ${leagueID}`))
+            }
           }
-        }
-      })
-      .catch((err) => {
-        reject(new Error(`Error finding league document ${leagueID}`))
-      })
+        })
+        .catch(() => {
+          reject(new Error(`Error finding league document ${leagueID}`))
+        })
     })
   },
 
@@ -176,9 +178,32 @@ module.exports = {
    * @param {string} userID - The user to remove from the league
    * @return {Promise} Promise resolving with the updated document
    */
-  leaveLeague: (leagueID, userID) => {
+  LeaveLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      reject(new Error('Not yet implemented'))
+      module.exports.vars.findOneLeague({ _id: leagueID })
+        .then((doc) => {
+          if (doc) {
+            const index = doc.participants.indexOf(userID)
+            if (index !== -1) {
+            // Update document
+              doc.participants.splice(index, 1)
+
+              // Save document
+              module.exports.vars.saveLeague(doc)
+                .then((res) => {
+                  resolve(doc)
+                })
+                .catch(() => {
+                  reject(new Error(`Error saving league document ${leagueID}`))
+                })
+            } else {
+              reject(new Error(`user ${userID} cannot be removed from ${leagueID}`))
+            }
+          }
+        })
+        .catch(() => {
+          reject(new Error(`Error finding league document ${leagueID}`))
+        })
     })
   },
 
@@ -189,7 +214,13 @@ module.exports = {
    */
   DeleteLeague: (leagueID) => {
     return new Promise((resolve, reject) => {
-      reject(new Error('Not yet implemented'))
+      module.exports.vars.deleteLeagueWithQuery({ _id: leagueID })
+        .then((res) => {
+          resolve()
+        })
+        .catch(() => {
+          reject(new Error(`Error deleting league document ${leagueID}`))
+        })
     })
   },
 
@@ -200,7 +231,24 @@ module.exports = {
    */
   UpdateLeague: (newLeague) => {
     return new Promise((resolve, reject) => {
-      reject(new Error('Not yet implemented'))
+      module.exports.vars.findOneLeague({ _id: newLeague._id })
+        .then((doc) => {
+          if (doc) {
+            for (const [k, v] of Object.entries(newLeague)) {
+              doc[k] = v
+            }
+
+            module.exports.vars.saveLeague(doc)
+              .then(doc => resolve(doc))
+              .catch(() => {
+                reject(new Error(`Error saving league document ${newLeague._id}`))
+              })
+          }
+          reject(new Error(`Could not find league with id ${newLeague._id}`))
+        })
+        .catch(() => {
+          reject(new Error(`Error finding league with id ${newLeague._id}`))
+        })
     })
   }
 }

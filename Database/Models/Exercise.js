@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-const { Schema } = mongoose;
+import mongoose from 'mongoose'
+const { Schema } = mongoose
 
 const exerciseSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -21,4 +21,4 @@ const exerciseSchema = new Schema({
   }]
 })
 
-exports.module = mongoose.model('Exercise', exerciseSchema);
+exports.module = mongoose.model('Exercise', exerciseSchema)

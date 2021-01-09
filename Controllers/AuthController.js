@@ -1,4 +1,4 @@
-var User = require('../Database/Models/User')
+// const User = require('../Database/Models/User')
 
 function hashPassword () {
 
@@ -6,5 +6,5 @@ function hashPassword () {
 module.exports.hashPassword = hashPassword
 
 module.exports.createUser = (req, res, next) => {
-  res.json({ "implemented": false })
+  res.json({ implemented: false })
 }
