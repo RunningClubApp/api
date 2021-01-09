@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const express = require('express')
+const logger = require('morgan')
 const compression = require('compression')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -25,6 +26,8 @@ const app = express()
 app.use(compression())
 
 app.use(helmet())
+
+app.use(logger('dev'))
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -79,8 +82,8 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500)
 
   if (req.app.get('env') !== 'production') {
-    console.log(err)
-    res.json({ status: 500, reason: err })
+    console.error(err)
+    res.json({ status: err.status, reason: err })
   } else {
     res.json({ status: err.status || 500 })
   }

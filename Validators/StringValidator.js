@@ -10,7 +10,7 @@ module.exports = (object, opts) => {
   }
 
   if (opts.regex) {
-    if (object.match(opts.regex)) {
+    if (!object.match(opts.regex)) {
       return { err: true, errors: { invalid: true } }
     }
   }
