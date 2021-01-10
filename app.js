@@ -10,7 +10,7 @@ const helmet = require('helmet')
 // const jwt = require('./bin/jwt')
 
 const leagueRouter = require('./routes/LeagueRouter')()
-const authRouter = require('./routes/auth')()
+const authRouter = require('./routes/AuthRouter')()
 // const usersRouter = require('./routes/users')()
 // const conversationsRouter = require('./routes/conversations')()
 // const reportsRouter = require('./routes/reports')()

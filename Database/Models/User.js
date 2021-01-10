@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-const { Schema } = mongoose
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const userSchema = new Schema({
   name: { type: String, required: true, maxLength: 16 },
@@ -29,4 +29,4 @@ userSchema.statics.testValidate = function (user) {
   })
 }
 
-exports.module = mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema)

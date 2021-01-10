@@ -1,6 +1,7 @@
 const User = require('../Database/Models/User')
 const cfg = require('../api.config')
 const bcrypt = require('bcrypt')
+const jwt = require('../bin/jwt')
 
 /**
  * Hashes a plaintext password
@@ -29,6 +30,7 @@ module.exports = {
   vars: {
     hashPassword: hashPassword,
     rightNow: Date.now,
+    getToken: jwt.IssueToken,
     findOneUser: (query) => {
       return new Promise((resolve, reject) => {
         User.findOne(query, (err, user) => {
@@ -67,7 +69,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneUser({ email: email })
         .then((usr) => {
-          if (usr === undefined) {
+          if (usr === undefined || usr === null) {
             module.exports.vars.hashPassword(plaintext)
               .then((pwd) => {
                 const user = {
@@ -75,16 +77,17 @@ module.exports = {
                   name: name,
                   pass_hash: pwd,
                   timestamps: {
-                    last_login: module.exports.vars.rightNow,
-                    signup_at: module.exports.vars.rightNow
+                    last_login: module.exports.vars.rightNow(),
+                    signup_at: module.exports.vars.rightNow()
                   }
                 }
                 User.testValidate(user)
                   .then(module.exports.vars.saveUser)
                   .then((doc) => {
-                    resolve({ ok: false, doc })
+                    resolve({ ok: true, doc })
                   })
-                  .catch(() => {
+                  .catch((e) => {
+                    console.log(e)
                     reject(new Error('Failed to validate and save user.'))
                   })
               })
@@ -95,10 +98,22 @@ module.exports = {
             resolve({ ok: false, errors: { exists: true } })
           }
         })
-        .catch(() => {
+        .catch((e) => {
+          console.log(e)
           reject(new Error('Failed to create user in the db.'))
         })
     })
+  },
+  /**
+   * Fetches a JWT with a user id as a payload
+   * @param {Object} user - The user to sign as a jwt
+   * @returns {Promise} A Promise which resolves to have the jwt
+   */
+  GetJWToken: (user) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.getToken({ _id: user._id })
+        .then(token => resolve({ ok: true, doc: token }))
+        .catch(reject)
+    })
   }
-
 }

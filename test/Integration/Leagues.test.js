@@ -84,7 +84,7 @@ describe('POST /leagues', () => {
   const tests = [
     {
       name: 'Correctly creates a league',
-      params: { title: 'league_title', creator: '5ff6440d15729b5df16823e3', length: 'Weekly' },
+      params: { title: 'leaguetitle', creator: '5ff6440d15729b5df16823e3', length: 'Weekly' },
       want: {
         code: 200,
         body: {
@@ -96,7 +96,7 @@ describe('POST /leagues', () => {
             participants: ['5ff6440d15729b5df16823e3'],
             private: true,
             timestamps: { start_date: '2000-01-01T00:00:00.000Z' },
-            title: 'league_title'
+            title: 'leaguetitle'
           }
         }
       }
