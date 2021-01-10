@@ -23,7 +23,7 @@ module.exports = () => {
     return res.status(400).json({ success: false, errors: { league: result.errors } })
   })
 
-  router.post('/create', async (req, res, next) => {
+  router.post('/', async (req, res, next) => {
     // Read and validate params
     const title = req.query.ti
     let valid = StrValidator(title, { range: [1, 16], regex: /[a-zA-Z0-9\s]/ })
@@ -151,9 +151,9 @@ module.exports = () => {
     // Invite to the league
     const result = await LeagueController.InviteToLeague(league, user).catch(err => next(err))
     if (result.ok) {
-      res.json({ success: true })
+      return res.json({ success: true })
     }
-    res.status(400).json({ success: false, errors: { league: result.errors } })
+    return res.status(400).json({ success: false, errors: { league: result.errors } })
   })
 
   return router

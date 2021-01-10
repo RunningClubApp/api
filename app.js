@@ -27,7 +27,9 @@ app.use(compression())
 
 app.use(helmet())
 
-app.use(logger('dev'))
+if (process.env.NODE_ENV !== 'testing') {
+  app.use(logger('dev'))
+}
 
 const corsOptions = {
   origin: function (origin, callback) {

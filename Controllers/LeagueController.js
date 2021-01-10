@@ -4,6 +4,9 @@ const League = require('../Database/Models/League')
  * @module LeagueController
  */
 module.exports = {
+  /**
+   * vars is used to access the db. It is done this way for easy stubbing during tests.
+   */
   vars: {
     saveLeague: (league) => {
       return new Promise((resolve, reject) => {
@@ -102,8 +105,9 @@ module.exports = {
         .then((doc) => {
           if (doc !== undefined) {
             resolve({ ok: true, doc })
+          } else {
+            resolve({ ok: false, errors: { nonexist: true } })
           }
-          resolve({ ok: false, err: { nonexist: true } })
         })
         .catch(() => {
           reject(new Error(`Error fetching league with id: ${id}`))

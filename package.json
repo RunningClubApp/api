@@ -5,6 +5,8 @@
   "main": "bin/www",
   "dependencies": {
     "chai": "^4.2.0",
+    "chai-exclude": "^2.0.2",
+    "chai-http": "^4.3.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -20,7 +22,7 @@
   "scripts": {
     "start": "standard --fix && node bin/www",
     "docs": "jsdoc -c jsdoc.config.json",
-    "test": "mocha ./test/**/*.test.js",
+    "test": "NODE_ENV=testing mocha ./test/**/*.test.js",
     "lint": "standard --fix"
   },
   "repository": {
@@ -35,7 +37,7 @@
   "homepage": "https://github.com/RunningClubApp/api#readme",
   "standard": {
     "ignore": [
-      "**/test/"
+      "**/test/**/*.test.js"
     ]
   }
 }
