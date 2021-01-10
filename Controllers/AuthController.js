@@ -5,8 +5,9 @@ const jwt = require('../bin/jwt')
 
 /**
  * Hashes a plaintext password
+ * @module AuthController
  * @param {string} plaintext - The plaintext string
- * @returns {Promise} A promise resolving wit the hashed password
+ * @returns {Promise} A promise resolving with the hashed password
  */
 function hashPassword (plaintext) {
   return new Promise((resolve, reject) => {
@@ -26,6 +27,9 @@ function hashPassword (plaintext) {
   })
 }
 
+/**
+ * @module AuthController
+ */
 module.exports = {
   vars: {
     hashPassword: hashPassword,
