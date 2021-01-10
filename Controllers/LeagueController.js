@@ -85,7 +85,9 @@ module.exports = {
         .then((l) => {
           module.exports.vars.saveLeague(l)
             .then(newdoc => resolve({ ok: true, doc: newdoc }))
-            .catch(err => reject(err))
+            .catch(() => {
+              reject(new Error('Error saving league document'))
+            })
         })
         .catch(() => {
           reject(new Error('Error validating league document'))
