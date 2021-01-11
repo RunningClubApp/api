@@ -69,7 +69,7 @@ module.exports = {
   /**
    * Saves an exercise to a document in the database.
    * @param {string} user - The user ID of the exercise owner.
-   * @param {[Object]} path - The path of the exercise, should take the form [{ coords: { lat: Num, lng: Num }, elevation: Num, timestamp: string }]
+   * @param {Array} path - The path of the exercise, should take the form [{ coords: { lat: Num, lng: Num }, elevation: Num, timestamp: string }]
    * @param {Date} start - The start time of the exercise.
    * @param {Date} end - The end time of the exercise.
    * @returns {Promise} A promise resolving with { ok, doc }
@@ -216,7 +216,7 @@ module.exports = {
    * @throws {nonexist} The exercise document does not exist
    * @throws {user.notkudoed} The user has not added a kudo to this doc.
    */
-  RemoveeKudos: (userID, exerciseID) => {
+  RemoveKudos: (userID, exerciseID) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneExercise({ _id: exerciseID })
         .then((doc) => {
