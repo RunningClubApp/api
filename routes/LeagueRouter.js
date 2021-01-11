@@ -16,6 +16,18 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
+    const fetch = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+
+    if (fetch.doc.creator !== req.user._id &&
+        fetch.doc.participants.indexOf(req.user._id) === -1 &&
+        fetch.doc.invited_users.indexOf(req.user._id) === -1 &&
+        fetch.doc.private === true) {
+      return res.status(401).json({ success: false, errors: { badauth: true } })
+    }
+
     const result = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true, league: result.doc })
@@ -31,7 +43,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { title: valid.errors } })
     }
 
-    const creator = req.query.usr
+    const creator = req.user._id
     valid = OIDValidator(creator)
     if (valid.err) {
       return res.status(400).json({ success: false, errors: { creator: valid.errors } })
@@ -56,6 +68,14 @@ module.exports = () => {
     const valid = OIDValidator(leagueID)
     if (valid.err) {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
+    }
+
+    const fetch = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+    if (fetch.doc.creator !== req.user._id) {
+      return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
     const result = await LeagueController.DeleteLeague(leagueID).catch(err => next(err))
@@ -105,6 +125,14 @@ module.exports = () => {
       league.private = JSON.parse(priv)
     }
 
+    const fetch = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+    if (fetch.doc.creator !== req.user._id) {
+      return res.status(401).json({ success: false, errors: { badauth: true } })
+    }
+
     const result = await LeagueController.UpdateLeague(league).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true, league: result.doc })
@@ -114,7 +142,7 @@ module.exports = () => {
 
   router.patch('/join', async (req, res, next) => {
     // Read and validate params
-    const user = req.query.usr
+    const user = req.user._id
     let valid = OIDValidator(user)
     if (valid.err) {
       return res.status(400).json({ success: false, errors: { user: valid.errors } })
@@ -146,6 +174,15 @@ module.exports = () => {
     valid = OIDValidator(league)
     if (valid.err) {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
+    }
+
+    const fetch = await LeagueController.FetchLeague(league).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+    if (fetch.doc.creator !== req.user._id &&
+        fetch.doc.participant.indexOf(req.user._id) === -1) {
+      return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
     // Invite to the league
