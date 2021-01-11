@@ -118,7 +118,8 @@ module.exports = {
   },
 
   /**
-   * Enters a user into a league
+   * Enters a user into a league, provided the league is public
+   * or the user has been invited.
    * @throws {private} - Returned if the document is private
    * @throws {noinvite} - Returned if the user has not been invited
    * @param {string} leagueID - The league t o add to

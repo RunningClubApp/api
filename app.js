@@ -62,23 +62,25 @@ app.use(express.urlencoded({ extended: false }))
 // or from the query param 'token'
 // the stored user _id is kept in req.user
 app.all('*', async (req, res, next) => {
+  req.user = { _id: undefined }
+  let token
   if (req.headers.authorization !== undefined) {
-    const token = req.headers.authorization.split(' ')[1]
-    if (token !== undefined) {
+    token = req.headers.authorization.split(' ')[1]
+  }
+  if (req.query.token !== undefined) {
+    token = req.query.token
+  }
+  if (token !== undefined) {
+    if (process.env.NODE_ENV === 'testing' && req.query.eztoken) {
+      req.user = {
+        _id: token
+      }
+    } else {
       const decoded = await AuthController.DecodeJWT(token).catch(next)
       if (decoded !== undefined) {
         req.user = {
           _id: decoded.sub._id
         }
-      }
-    }
-  }
-
-  if (req.query.token !== undefined) {
-    const decoded = await AuthController.DecodeJWT(req.query.token).catch(next)
-    if (decoded !== undefined) {
-      req.user = {
-        _id: decoded.sub._id
       }
     }
   }
