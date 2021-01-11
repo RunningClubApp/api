@@ -9,6 +9,8 @@ const helmet = require('helmet')
 // var passport = require('./bin/passport')()
 // const jwt = require('./bin/jwt')
 
+const AuthController = require('./Controllers/AuthController')
+
 const leagueRouter = require('./routes/LeagueRouter')()
 const authRouter = require('./routes/AuthRouter')()
 // const usersRouter = require('./routes/users')()
@@ -55,6 +57,34 @@ app.use(cors(corsOptions))
 // app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+
+// Intercept all traffic and decode a jwt from the header if provided.
+// or from the query param 'token'
+// the stored user _id is kept in req.user
+app.all('*', async (req, res, next) => {
+  if (req.headers.authorization !== undefined) {
+    const token = req.headers.authorization.split(' ')[1]
+    if (token !== undefined) {
+      const decoded = await AuthController.DecodeJWT(token).catch(next)
+      if (decoded !== undefined) {
+        req.user = {
+          _id: decoded.sub._id
+        }
+      }
+    }
+  }
+
+  if (req.query.token !== undefined) {
+    const decoded = await AuthController.DecodeJWT(req.query.token).catch(next)
+    if (decoded !== undefined) {
+      req.user = {
+        _id: decoded.sub._id
+      }
+    }
+  }
+
+  return next()
+})
 
 // app.use('/', indexRouter)
 app.use('/leagues', leagueRouter)

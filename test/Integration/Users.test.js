@@ -39,9 +39,15 @@ AuthController.vars.saveUser = (newUser) => {
 }
 
 
-AuthController.vars.getToken = () => {
+AuthController.vars.encodeToken = (usr) => {
   return new Promise((resolve, reject) => {
-    resolve({ token: 'token', expiresIn: '1d' })
+    resolve(JSON.stringify({ token: 'token' }))
+  })
+}
+
+AuthController.vars.decodeToken = (token) => {
+  return new Promise((resolve, reject) => {
+    resolve(JSON.parse(token))
   })
 }
 
@@ -50,7 +56,6 @@ AuthController.vars.hashPassword = (p) => {
     resolve(`hash$${p}`)
   })
 }
-
 
 AuthController.vars.compPassword = (p, h) => {
   return new Promise((resolve, reject) => {
@@ -73,7 +78,7 @@ describe('POST /auth', () => {
             counts: { golds: 0, silvers: 0, bronzes: 0 },
             timestamps: { last_login: "2000-01-01T00:00:00.000Z", signup_at: "2000-01-01T00:00:00.000Z" }
           },
-          token: { token: 'token', expiresIn: '1d' }
+          token: { token: 'token' }
         }
       }
     },

@@ -47,7 +47,8 @@ module.exports = {
     hashPassword: hashPassword,
     compPassword: comparePasswords,
     rightNow: Date.now,
-    getToken: jwt.IssueToken,
+    encodeToken: jwt.IssueToken,
+    decodeToken: jwt.VerifyToken,
     findOneUser: (query) => {
       return new Promise((resolve, reject) => {
         User.findOne(query, (err, user) => {
@@ -122,17 +123,11 @@ module.exports = {
     })
   },
   /**
-   * Fetches a JWT with a user id as a payload
-   * @param {Object} user - The user to sign as a jwt
-   * @returns {Promise} A Promise which resolves to have the jwt
+   * Checks login details with the db, and returns the user if valid
+   * @param {string} email - The email of the user
+   * @param {password} password - The plaintext password of the user
+   * @returns {Promise} A promise resolving with { ok: true|false, doc: user|undefined, errors: errors|undefined}
    */
-  GetJWToken: (user) => {
-    return new Promise((resolve, reject) => {
-      module.exports.vars.getToken({ _id: user._id })
-        .then(token => resolve({ ok: true, doc: token }))
-        .catch(reject)
-    })
-  },
   LoginUser: (email, password) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneUser({ email: email })
@@ -165,6 +160,36 @@ module.exports = {
         .catch(() => {
           reject(new Error('Error finding user.'))
         })
+    })
+  },
+  /**
+   * Fetches a JWT with a user id as a payload
+   * @param {Object} user - The user to sign as a jwt
+   * @returns {Promise} A Promise which resolves to have the jwt
+   */
+  GetJWToken: (user) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.encodeToken({ _id: user._id })
+        .then(token => resolve({ ok: true, doc: token }))
+        .catch(() => reject(new Error('Error signing jwt')))
+    })
+  },
+  /**
+   * Decodes a jwt token
+   * @param {string} token - The token to decode
+   * @returns {Promise} A promise which resolves with { ok, doc?, errors?}
+   */
+  DecodeJWT: (token) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.decodeToken(token)
+        .then((decoded) => {
+          if (decoded !== undefined) {
+            resolve({ ok: true, doc: decoded })
+          } else {
+            resolve({ ok: false, errors: { token: { invalid: true } } })
+          }
+        })
+        .catch(() => reject(new Error('Error decoding jwt')))
     })
   }
 }
