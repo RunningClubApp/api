@@ -45,13 +45,20 @@ AuthController.vars.getToken = () => {
   })
 }
 
-AuthController.vars.hashPassword = () => {
+AuthController.vars.hashPassword = (p) => {
   return new Promise((resolve, reject) => {
-    resolve('hash$password')
+    resolve(`hash$${p}`)
   })
 }
 
-describe('POST /users', () => {
+
+AuthController.vars.compPassword = (p, h) => {
+  return new Promise((resolve, reject) => {
+    resolve(`hash$${p}` === h)
+  })
+}
+
+describe('POST /auth', () => {
   const tests = [
     {
       name: 'Correctly creates a user',
@@ -122,6 +129,89 @@ describe('POST /users', () => {
       chai
         .request(app)
         .post(`/auth`)
+        .set('content-type', 'application/json')
+        .send(test.body)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          res.should.have.status(test.want.code)
+          expect(res.body).excludingEvery('_id').to.deep.equal(test.want.body)
+          done()
+        })
+    })
+  })
+})
+
+describe('POST /auth/login', () => {
+  const tests = [
+    {
+      name: 'Correctly logs a user',
+      body: { email: 'test@testing.test', password: 'password' },
+      want: {
+        code: 200,
+        body: {
+          success: true,
+          user: {
+            name: 'testington', email: 'test@testing.test',
+            pass_hash: 'hash$password',
+            counts: { golds: 0, silvers: 0, bronzes: 0 },
+            timestamps: { last_login: "2000-01-01T00:00:00.000Z", signup_at: "2000-01-01T00:00:00.000Z" }
+          },
+          token: { token: 'token', expiresIn: '1d' }
+        }
+      }
+    },
+    {
+      name: 'Rejects incorrect password',
+      body: { email: 'test@testing.test', password: 'drowssap' },
+      want: {
+        code: 400,
+        body: {
+          success: false,
+          errors: { password: { incorrect: true } }
+        }
+      }
+    },
+    {
+      name: 'Rejects incorrect email',
+      body: { email: 'test2@testing.test', password: 'password' },
+      want: {
+        code: 400,
+        body: {
+          success: false,
+          errors: { user: { notfound: true } }
+        }
+      }
+    },
+    {
+      name: 'Rejects missing password',
+      body: { email: 'test@testing.test' },
+      want: {
+        code: 400,
+        body: {
+          success: false,
+          errors: { password: { missing: true } }
+        }
+      }
+    },
+    {
+      name: 'Rejects missing email',
+      body: { password: 'password' },
+      want: {
+        code: 400,
+        body: {
+          success: false,
+          errors: { email: { missing: true } }
+        }
+      }
+    },
+  ]
+
+  tests.forEach((test) => {
+    it(test.name, (done) => {
+      afterEach(restoreDB)
+      chai
+        .request(app)
+        .post(`/auth/login`)
         .set('content-type', 'application/json')
         .send(test.body)
         .end((err, res) => {

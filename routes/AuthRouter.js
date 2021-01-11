@@ -1,9 +1,6 @@
 const AuthController = require('../Controllers/AuthController')
 const express = require('express')
-
-// const OIDValidator = require('../Validators/ObjectIdValidator')
 const StrValidator = require('../Validators/StringValidator')
-// const BoolValidator = require('../Validators/BoolValidator')
 
 module.exports = () => {
   const router = express.Router()
@@ -40,6 +37,28 @@ module.exports = () => {
 
     const token = await AuthController.GetJWToken(result.doc).catch(err => next(err))
 
+    return res.json({ success: true, user: result.doc, token: token.doc })
+  })
+
+  router.post('/login', async (req, res, next) => {
+    const email = req.body.email
+    const pwd = req.body.password
+
+    let valid = StrValidator(email, {})
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { email: valid.errors } })
+    }
+    valid = StrValidator(pwd, {})
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { password: valid.errors } })
+    }
+
+    const result = await AuthController.LoginUser(email, pwd).catch(next)
+    if (!result.ok) {
+      return res.status(400).json({ success: false, errors: result.errors })
+    }
+
+    const token = await AuthController.GetJWToken(result.doc).catch(next)
     return res.json({ success: true, user: result.doc, token: token.doc })
   })
 

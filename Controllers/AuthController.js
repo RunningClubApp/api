@@ -27,12 +27,25 @@ function hashPassword (plaintext) {
   })
 }
 
+function comparePasswords (plain, hash) {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(plain, hash, (err, result) => {
+      if (err) {
+        reject(new Error('Error comparing passwords.'))
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
+
 /**
  * @module AuthController
  */
 module.exports = {
   vars: {
     hashPassword: hashPassword,
+    compPassword: comparePasswords,
     rightNow: Date.now,
     getToken: jwt.IssueToken,
     findOneUser: (query) => {
@@ -118,6 +131,40 @@ module.exports = {
       module.exports.vars.getToken({ _id: user._id })
         .then(token => resolve({ ok: true, doc: token }))
         .catch(reject)
+    })
+  },
+  LoginUser: (email, password) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.findOneUser({ email: email })
+        .then((usr) => {
+          if (usr !== undefined) {
+            module.exports.vars.compPassword(password, usr.pass_hash)
+              .then((result) => {
+                if (result === true) {
+                  usr.timestamps.last_login = module.exports.vars.rightNow()
+                  User.testValidate(usr)
+                    .then(module.exports.vars.saveUser)
+                    .then((doc) => {
+                      resolve({ ok: true, doc })
+                    })
+                    .catch((e) => {
+                      reject(new Error('Error saving users.'))
+                    })
+                } else {
+                  resolve({ ok: false, errors: { password: { incorrect: true } } })
+                }
+              })
+              .catch((err) => {
+                console.log(err)
+                reject(new Error('Error comparing passwords.'))
+              })
+          } else {
+            resolve({ ok: false, errors: { user: { notfound: true } } })
+          }
+        })
+        .catch(() => {
+          reject(new Error('Error finding user.'))
+        })
     })
   }
 }
