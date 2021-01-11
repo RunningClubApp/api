@@ -20,19 +20,15 @@ module.exports = () => {
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
     }
-
-    if (fetch.doc.creator !== req.user._id &&
-        fetch.doc.participants.indexOf(req.user._id) === -1 &&
-        fetch.doc.invited_users.indexOf(req.user._id) === -1 &&
-        fetch.doc.private === true) {
+    // Check that the user is permitted to see it
+    if (fetch.doc.creator !== req.user._id && // not creator
+        fetch.doc.participants.indexOf(req.user._id) === -1 && // not participant
+        fetch.doc.invited_users.indexOf(req.user._id) === -1 && // not invited
+        fetch.doc.private === true) { // not public
       return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
-    const result = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
-    if (result.ok) {
-      return res.json({ success: true, league: result.doc })
-    }
-    return res.status(400).json({ success: false, errors: { league: result.errors } })
+    return res.json({ success: true, league: fetch.doc })
   })
 
   router.post('/', async (req, res, next) => {
@@ -70,6 +66,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
+    // Check if the league can be deleted by the logged in user
     const fetch = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
@@ -125,6 +122,7 @@ module.exports = () => {
       league.private = JSON.parse(priv)
     }
 
+    // Check if the league can be updated by the logged in user
     const fetch = await LeagueController.FetchLeague(leagueID).catch(err => next(err))
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
@@ -154,7 +152,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
-    // Create the league
+    // Join the league
     const result = await LeagueController.JoinLeague(league, user).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true, league: result.doc })
@@ -176,6 +174,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: valid.errors } })
     }
 
+    // Check if the logged in user is permitted to send invites
     const fetch = await LeagueController.FetchLeague(league).catch(err => next(err))
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
