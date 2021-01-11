@@ -13,10 +13,7 @@ const AuthController = require('./Controllers/AuthController')
 
 const leagueRouter = require('./routes/LeagueRouter')()
 const authRouter = require('./routes/AuthRouter')()
-// const usersRouter = require('./routes/users')()
-// const conversationsRouter = require('./routes/conversations')()
-// const reportsRouter = require('./routes/reports')()
-// const adminRouter = require('./routes/admin/index')()
+const exerciseRouter = require('./routes/ExerciseRouter')()
 
 const app = express()
 
@@ -91,11 +88,7 @@ app.all('*', async (req, res, next) => {
 // app.use('/', indexRouter)
 app.use('/leagues', leagueRouter)
 app.use('/auth', authRouter)
-// app.use('/users', usersRouter)
-// app.use('/conversations', conversationsRouter)
-// app.use('/reports', reportsRouter)
-// app.use('/admin', adminRouter)
-
+app.use('/exercise', exerciseRouter)
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))

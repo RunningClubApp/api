@@ -20,7 +20,7 @@ const exerciseSchema = new Schema({
     emoji: { type: String, enum: ['Smiley', 'Heart', 'Wow', 'Thumbs Up', '100'], default: 'Smiley' },
     user: { type: ObjectId, ref: 'User', required: true }
   }],
-  verified: { type: Boolean, required: true }
+  verified: { type: Boolean, default: true }
 })
 
 exerciseSchema.statics.testValidate = function (exercise) {
