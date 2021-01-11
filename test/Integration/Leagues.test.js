@@ -74,7 +74,7 @@ describe('GET /leagues', async () => {
       }
     },
     { /** Security test */
-      name: 'Cannot fetch private league if not owner, participant, or invited',
+      name: 'SECURITY: Cannot fetch private league if not owner, participant, or invited',
       id: '5ff6440d15729b5df16823e3',
       token: '7ff6440d15729b5df16823e3',
       want: {
@@ -83,7 +83,7 @@ describe('GET /leagues', async () => {
       }
     },
     { /** Security test */
-      name: 'Cannot fetch private league if req.user is missing',
+      name: 'SECURITY: Cannot fetch private league if req.user is missing',
       id: '5ff6440d15729b5df16823e3',
       token: '',
       want: {
@@ -92,7 +92,7 @@ describe('GET /leagues', async () => {
       }
     },
     { /** Security test */
-      name: 'Cannot fetch private league if req.user is invalid',
+      name: 'SECURITY: Cannot fetch private league if req.user is invalid',
       id: '5ff6440d15729b5df16823e3',
       token: 'invalid token',
       want: {
@@ -213,6 +213,17 @@ describe('DELETE /leagues', () => {
         }
       }
     },
+    {
+      name: 'SECURITY: Cannot delete league if not owner',
+      params: { league: '8ff6440d15729b5df16823e3', token: '7ff6440d15729b5df16823e3' },
+      want: {
+        code: 401,
+        body: {
+          success: false,
+          errors: { badauth: true }
+        }
+      }
+    },
   ]
 
   tests.forEach((test) => {
@@ -272,7 +283,16 @@ describe('PATCH /leagues/invite', () => {
         code: 400,
         body: { success: false, errors: { user: { invalid: true } } }
       }
+    },
+    {
+      name: 'SECURITY: Cannot invite if not creator or participant',
+      params: { league: '8ff6440d15729b5df16823e3', usr: '5ff6440d15729b5df16823e3', token: '9ff6440d15729b5df16823e3' },
+      want: {
+        code: 401,
+        body: { success: false, errors: { badauth: true } }
+      }
     }
+
   ]
 
   tests.forEach((test) => {

@@ -21,6 +21,13 @@ module.exports = () => {
         invited_users: [],
         participants: [],
         private: false
+      },
+      '8ff6440d15729b5df16823e3': {
+        _id: '8ff6440d15729b5df16823e3',
+        creator: '6ff6440d15729b5df16823e3',
+        invited_users: ['7ff6440d15729b5df16823e3'],
+        participants: ['7ff6440d15729b5df16823e3'],
+        private: false
       }
     },
     users: {

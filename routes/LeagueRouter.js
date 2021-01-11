@@ -181,7 +181,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
     }
     if (fetch.doc.creator !== req.user._id &&
-        fetch.doc.participant.indexOf(req.user._id) === -1) {
+        fetch.doc.participants.indexOf(req.user._id) === -1) {
       return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
