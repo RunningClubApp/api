@@ -1,11 +1,11 @@
-import mongoose from 'mongoose'
-const { Schema } = mongoose
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const userSchema = new Schema({
   name: { type: String, required: true, maxLength: 16 },
   email: { type: String, required: true, lowercase: true, maxlength: 256 },
   picture: { type: String },
-  pass_hash: { type: String, required: true, maxLength: 32 },
+  pass_hash: { type: String, required: true },
   counts: {
     golds: { type: Number, default: 0 },
     silvers: { type: Number, default: 0 },
@@ -17,4 +17,16 @@ const userSchema = new Schema({
   }
 })
 
-exports.module = mongoose.model('User', userSchema)
+userSchema.statics.testValidate = function (user) {
+  return new Promise((resolve, reject) => {
+    const userObj = new this(user)
+
+    userObj.validate((err) => {
+      if (err) return reject(err)
+
+      resolve(userObj)
+    })
+  })
+}
+
+module.exports = mongoose.model('User', userSchema)

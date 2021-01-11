@@ -16,9 +16,10 @@ const exerciseSchema = new Schema({
     end_date: { type: Date, default: Date.now, required: true }
   },
   kudos: [{
-    emoji: { type: String, enum: ['Smiley', 'Heart', 'Angry', 'Thumbs Up', '100'], default: 'Smiley' },
+    emoji: { type: String, enum: ['Smiley', 'Heart', 'Wow', 'Thumbs Up', '100'], default: 'Smiley' },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true }
-  }]
+  }],
+  verified: { type: Boolean, required: true }
 })
 
 exports.module = mongoose.model('Exercise', exerciseSchema)

@@ -26,7 +26,7 @@ module.exports = () => {
   router.post('/', async (req, res, next) => {
     // Read and validate params
     const title = req.query.ti
-    let valid = StrValidator(title, { range: [1, 16], regex: /[a-zA-Z0-9\s]/ })
+    let valid = StrValidator(title, { range: [1, 16], regex: /[a-zA-Z0-9\s]*/ })
     if (valid.err) {
       return res.status(400).json({ success: false, errors: { title: valid.errors } })
     }
