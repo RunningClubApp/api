@@ -1,5 +1,8 @@
 const Exercise = require('../Database/Models/Exercise')
 
+/**
+ * @module ExerciseController
+ */
 module.exports = {
   vars: {
     saveExercise: (exercise) => {
