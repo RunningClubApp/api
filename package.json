@@ -27,7 +27,8 @@
     "start": "standard --fix && node bin/www",
     "docs": "jsdoc -c jsdoc.config.json",
     "test": "NODE_ENV=testing mocha ./test/**/*.test.js",
-    "lint": "standard --fix"
+    "lint": "standard",
+    "pipeline": "jsdoc -c jsdoc.config.json && NODE_ENV=testing mocha ./test/**/*.test.js && standard"
   },
   "repository": {
     "type": "git",

@@ -1,8 +1,9 @@
-import mongoose from 'mongoose'
-const { Schema } = mongoose
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = mongoose.Types.ObjectId
 
 const exerciseSchema = new Schema({
-  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  owner: { type: ObjectId, ref: 'User', required: true },
   path: [{
     coords: {
       lat: { type: Number, required: true },
@@ -17,9 +18,21 @@ const exerciseSchema = new Schema({
   },
   kudos: [{
     emoji: { type: String, enum: ['Smiley', 'Heart', 'Wow', 'Thumbs Up', '100'], default: 'Smiley' },
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    user: { type: ObjectId, ref: 'User', required: true }
   }],
-  verified: { type: Boolean, required: true }
+  verified: { type: Boolean, default: true }
 })
 
-exports.module = mongoose.model('Exercise', exerciseSchema)
+exerciseSchema.statics.testValidate = function (exercise) {
+  return new Promise((resolve, reject) => {
+    const exerciseObj = new this(exercise)
+
+    exerciseObj.validate((err) => {
+      if (err) return reject(err)
+
+      resolve(exerciseObj)
+    })
+  })
+}
+
+module.exports = mongoose.model('Exercise', exerciseSchema)
