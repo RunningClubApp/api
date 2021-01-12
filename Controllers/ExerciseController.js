@@ -132,7 +132,7 @@ module.exports = {
             resolve({ ok: false, errors: { nonexist: true } })
           }
         })
-        .catch(() => reject(new Error('Error finding exercises for user.')))
+        .catch((err) => { console.log(err); reject(new Error('Error finding exercises for user.')) })
     })
   },
   /**
@@ -233,7 +233,7 @@ module.exports = {
                   reject(new Error(`Error updating exercise with id ${exerciseID}`))
                 })
             } else {
-              resolve({ ok: false, errors: { user: { kudoed: true } } })
+              resolve({ ok: false, errors: { user: { notkudoed: true } } })
             }
           } else {
             resolve({ ok: false, errors: { nonexist: true } })
