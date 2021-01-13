@@ -126,13 +126,13 @@ module.exports = {
    * Checks login details with the db, and returns the user if valid
    * @param {string} email - The email of the user
    * @param {password} password - The plaintext password of the user
-   * @returns {Promise} A promise resolving with { ok: true|false, doc: user|undefined, errors: errors|undefined}
+   * @returns {Promise} A promise resolving with { ok, doc?, errors? }
    */
   LoginUser: (email, password) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.findOneUser({ email: email })
         .then((usr) => {
-          if (usr !== undefined) {
+          if (usr !== undefined && usr !== null) {
             module.exports.vars.compPassword(password, usr.pass_hash)
               .then((result) => {
                 if (result === true) {

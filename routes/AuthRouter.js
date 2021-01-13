@@ -53,12 +53,12 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { password: valid.errors } })
     }
 
-    const result = await AuthController.LoginUser(email, pwd).catch(next)
+    const result = await AuthController.LoginUser(email, pwd).catch((e) => { console.log(e); next(e) })
     if (!result.ok) {
       return res.status(400).json({ success: false, errors: result.errors })
     }
 
-    const token = await AuthController.GetJWToken(result.doc).catch(next)
+    const token = await AuthController.GetJWToken(result.doc).catch(err => next(err))
     return res.json({ success: true, user: result.doc, token: token.doc })
   })
 

@@ -37,7 +37,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { path: valid.errors } })
     }
 
-    const result = await ExerciseController.RecordExercise(user, path, start, end).catch(next)
+    const result = await ExerciseController.RecordExercise(user, path, start, end).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true, exercise: result.doc })
     }
@@ -57,7 +57,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { exercise: valid.errors } })
     }
 
-    const fetch = await ExerciseController.FetchExercise(exercise).catch(next)
+    const fetch = await ExerciseController.FetchExercise(exercise).catch(err => next(err))
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { exercise: fetch.errors } })
     }
@@ -67,7 +67,7 @@ module.exports = () => {
       return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
-    const result = await ExerciseController.DeleteExercise(exercise).catch(next)
+    const result = await ExerciseController.DeleteExercise(exercise).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true, exercise: result.doc })
     }
@@ -87,7 +87,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { exercise: valid.errors } })
     }
 
-    const result = await ExerciseController.FetchExercise(exercise).catch(next)
+    const result = await ExerciseController.FetchExercise(exercise).catch(err => next(err))
     if (result.ok) {
       res.json({ success: true, exercise: result.doc })
     }
@@ -114,7 +114,7 @@ module.exports = () => {
     }
     pageSize = parseInt(pageSize)
 
-    const result = await ExerciseController.FetchExerciseForUser(user, from, pageSize + 1).catch(next)
+    const result = await ExerciseController.FetchExerciseForUser(user, from, pageSize + 1).catch(err => next(err))
     if (result.ok) {
       let pagingTime = ''
       let docs = result.docs
@@ -147,7 +147,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { kudos: valid.errors } })
     }
 
-    const result = await ExerciseController.AddKudos(user, exercise, kudos).catch(next)
+    const result = await ExerciseController.AddKudos(user, exercise, kudos).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true })
     }
@@ -168,7 +168,7 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { exercise: valid.errors } })
     }
 
-    const result = await ExerciseController.RemoveKudos(user, exercise).catch(next)
+    const result = await ExerciseController.RemoveKudos(user, exercise).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true })
     }
