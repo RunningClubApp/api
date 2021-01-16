@@ -29,4 +29,6 @@ userSchema.statics.testValidate = function (user) {
   })
 }
 
+userSchema.index({ name: 'text', email: 'text' })
+
 module.exports = mongoose.model('User', userSchema)
