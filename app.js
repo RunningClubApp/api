@@ -14,6 +14,7 @@ const AuthController = require('./Controllers/AuthController')
 const leagueRouter = require('./routes/LeagueRouter')()
 const authRouter = require('./routes/AuthRouter')()
 const exerciseRouter = require('./routes/ExerciseRouter')()
+const userRouter = require('./routes/UserRouter')()
 
 const app = express()
 
@@ -40,15 +41,6 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions))
-
-// /**
-//  * Set up user sessions. Memory store for dev, mongoDB for prod
-//  */
-// app.use(require('./bin/sessions')((err) => {
-//   if (err) {
-//     debug(err)
-//   }
-// }))
 
 // view engine setup
 // app.use(logger('dev'))
@@ -89,6 +81,8 @@ app.all('*', async (req, res, next) => {
 app.use('/leagues', leagueRouter)
 app.use('/auth', authRouter)
 app.use('/exercise', exerciseRouter)
+app.use('/users', userRouter)
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404))
