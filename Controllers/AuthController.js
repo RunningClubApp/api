@@ -170,7 +170,7 @@ module.exports = {
   GetJWToken: (user) => {
     return new Promise((resolve, reject) => {
       module.exports.vars.encodeToken({ _id: user._id })
-        .then(token => resolve({ ok: true, doc: token }))
+        .then(token => resolve({ ok: true, token: token }))
         .catch(() => reject(new Error('Error signing jwt')))
     })
   },
@@ -184,7 +184,7 @@ module.exports = {
       module.exports.vars.decodeToken(token)
         .then((decoded) => {
           if (decoded !== undefined) {
-            resolve({ ok: true, doc: decoded })
+            resolve({ ok: true, token: decoded })
           } else {
             resolve({ ok: false, errors: { token: { invalid: true } } })
           }

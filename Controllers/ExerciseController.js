@@ -89,11 +89,11 @@ module.exports = {
       }
 
       Exercise.testValidate(exercise)
-        .then(module.exports.saveExercise)
+        .then(module.exports.vars.saveExercise)
         .then((doc) => {
           resolve({ ok: true, doc })
         })
-        .catch(() => { reject(new Error('Could not validate and save exericse.')) })
+        .catch((e) => { console.log(e); reject(new Error('Could not validate exericse.')) })
     })
   },
   /**

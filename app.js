@@ -73,10 +73,10 @@ app.all('*', async (req, res, next) => {
         _id: token
       }
     } else {
-      const decoded = await AuthController.DecodeJWT(token).catch(next)
-      if (decoded !== undefined) {
+      const result = await AuthController.DecodeJWT(token).catch(next)
+      if (result.ok) {
         req.user = {
-          _id: decoded.sub._id
+          _id: result.token.sub._id
         }
       }
     }

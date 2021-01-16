@@ -37,7 +37,7 @@ module.exports = () => {
 
     const token = await AuthController.GetJWToken(result.doc).catch(err => next(err))
 
-    return res.json({ success: true, user: result.doc, token: token.doc })
+    return res.json({ success: true, user: result.doc, token: token.token })
   })
 
   router.post('/login', async (req, res, next) => {

@@ -12,21 +12,21 @@ module.exports = (object) => {
   }
 
   for (const point of object) {
-    if (!point.coords) {
+    if (!('coords' in point)) {
       return { err: true, errors: { invalid: true } }
     }
-    if (!point.coords.lat || !point.coords.lng) {
+    if (!('lat' in point.coords) || !('lng' in point.coords)) {
       return { err: true, errors: { invalid: true } }
     }
     if (!isNumber(point.coords.lat) || !isNumber(point.coords.lng)) {
       return { err: true, errors: { invalid: true } }
     }
 
-    if (!point.elevation || !isNumber(point.elevation)) {
+    if (!('elevation' in point) || !isNumber(point.elevation)) {
       return { err: true, errors: { invalid: true } }
     }
 
-    if (!point.timestamp || isNaN(Date.parse(point.timestamp))) {
+    if (!('timestamp' in point) || isNaN(Date.parse(point.timestamp))) {
       return { err: true, errors: { invalid: true } }
     }
   }
