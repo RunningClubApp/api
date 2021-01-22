@@ -1,10 +1,10 @@
 const LeagueController = require('../Controllers/LeagueController')
 const express = require('express')
 
-const OIDValidator = require('../Validators/ObjectIdValidator')
-const StrValidator = require('../Validators/StringValidator')
-const LLValidator = require('../Validators/LeagueLengthValidator')
-const BoolValidator = require('../Validators/BoolValidator')
+const OIDValidator = require('../type-validators/ObjectIdValidator')
+const StrValidator = require('../type-validators/StringValidator')
+const LLValidator = require('../type-validators/LeagueLengthValidator')
+const BoolValidator = require('../type-validators/BoolValidator')
 
 module.exports = () => {
   const router = express.Router()
@@ -29,6 +29,21 @@ module.exports = () => {
     }
 
     return res.json({ success: true, league: fetch.doc })
+  })
+
+  router.get('/foruser', async (req, res, next) => {
+    const user = req.user._id
+    const valid = OIDValidator(user)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { user: valid.errors } })
+    }
+
+    const fetch = await LeagueController.FetchLeaguesForUser(user).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+
+    return res.json({ success: true, leagues: fetch.docs })
   })
 
   router.post('/', async (req, res, next) => {

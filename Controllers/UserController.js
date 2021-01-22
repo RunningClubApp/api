@@ -1,4 +1,4 @@
-const User = require('../Database/Models/User')
+const User = require('../mongo-database/Models/User')
 
 /**
  * @module UserController

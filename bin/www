@@ -18,7 +18,7 @@ app.set('port', port)
 /**
  * Connecting to the database.
  */
-var db = require('../Database/db')
+var db = require('../mongo-database/db')
 
 /**
  * Create HTTP server.

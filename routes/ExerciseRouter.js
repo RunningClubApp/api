@@ -1,10 +1,10 @@
 const ExerciseController = require('../Controllers/ExerciseController')
 const express = require('express')
-const PathValidator = require('../Validators/PathValidator')
-const OIDValidator = require('../Validators/ObjectIdValidator')
-const DateValidator = require('../Validators/DateValidator')
-const IntValidator = require('../Validators/IntegerValidator')
-const KudosValidator = require('../Validators/KudosValidator')
+const PathValidator = require('../type-validators/PathValidator')
+const OIDValidator = require('../type-validators/ObjectIdValidator')
+const DateValidator = require('../type-validators/DateValidator')
+const IntValidator = require('../type-validators/IntegerValidator')
+const KudosValidator = require('../type-validators/KudosValidator')
 
 module.exports = () => {
   const router = express.Router()

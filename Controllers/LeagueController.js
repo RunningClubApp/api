@@ -1,4 +1,4 @@
-const League = require('../Database/Models/League')
+const League = require('../mongo-database/Models/League')
 
 /**
  * @module LeagueController
@@ -22,9 +22,10 @@ module.exports = {
           })
       })
     },
-    findSomeLeagues: (query) => {
+    findSomeLeagues: (query, opts) => {
       return new Promise((resolve, reject) => {
         League.find(query)
+          .populate(opts.populate)
           .exec((err, docs) => {
             if (err) {
               reject(err)
@@ -113,6 +114,23 @@ module.exports = {
         })
         .catch(() => {
           reject(new Error(`Error fetching league with id: ${id}`))
+        })
+    })
+  },
+
+  /**
+   * Fetches a league documents for a specified user
+   * @param {string} userid - The id of the user to fetch leagues for
+   * @return {Promise} Promise resolving with the newly inserted document
+   */
+  FetchLeaguesForUser: (userid) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.findSomeLeagues({ participants: { $in: userid } }, { populate: 'participants' })
+        .then((docs) => {
+          resolve({ ok: true, docs })
+        })
+        .catch(() => {
+          reject(new Error(`Error fetching league with user ids: ${userid}`))
         })
     })
   },

@@ -1,4 +1,4 @@
-const Exercise = require('../Database/Models/Exercise')
+const Exercise = require('../mongo-database/Models/Exercise')
 
 /**
  * @module ExerciseController
