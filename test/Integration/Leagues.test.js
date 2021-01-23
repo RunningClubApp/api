@@ -133,7 +133,8 @@ describe('POST /leagues', () => {
             league_length: 'Weekly',
             participants: ['5ff6440d15729b5df16823e3'],
             private: true,
-            timestamps: { start_date: '2000-01-01T00:00:00.000Z' },
+            league_start: '2000-01-01T00:00:00.000Z',
+            timestamps: { created_at: '2000-01-01T00:00:00.000Z' },
             title: 'leaguetitle'
           }
         }

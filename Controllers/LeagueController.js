@@ -76,8 +76,9 @@ module.exports = {
         creator: creator,
         participants: [creator],
         league_length: length,
+        league_start: module.exports.vars.rightNow(),
         timestamps: {
-          start_date: module.exports.vars.rightNow()
+          created_at: module.exports.vars.rightNow()
         },
         history: []
       }
