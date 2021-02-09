@@ -4,6 +4,7 @@ const logger = require('morgan')
 const compression = require('compression')
 const cors = require('cors')
 const helmet = require('helmet')
+const config = require('./server.config')
 
 // const airbrake = require('./bin/airbrake')()
 // var passport = require('./bin/passport')()
@@ -30,10 +31,10 @@ const corsOptions = {
   origin: function (origin, callback) {
     // allow requests with no origin
     if (!origin) return callback(null, true)
-    // if (config.get('cors_whitelist').indexOf(origin) === -1) {
-    //   const message = 'The CORS policy for this origin doesn\'t allow access from the particular origin.'
-    //   return callback(new Error(message), false)
-    // }
+    if (config.cors_whitelist.indexOf(origin) === -1) {
+      const message = 'The CORS policy for this origin doesn\'t allow access from the particular origin.'
+      return callback(new Error(message), false)
+    }
     return callback(null, true)
   },
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -65,10 +66,10 @@ app.all('*', async (req, res, next) => {
         _id: token
       }
     } else {
-      const result = await AuthController.DecodeJWT(token).catch(next)
+      const result = await AuthController.DecodeJWT(token).catch(err => next(err))
       if (result.ok) {
         req.user = {
-          _id: result.token.sub._id
+          _id: JSON.parse(JSON.stringify(result.token.sub._id))
         }
       }
     }

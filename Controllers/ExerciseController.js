@@ -1,4 +1,5 @@
 const Exercise = require('../mongo-database/Models/Exercise')
+const calculate = require('../distance-calculator')
 
 /**
  * @module ExerciseController
@@ -247,5 +248,27 @@ module.exports = {
         })
     })
   },
-  FetchStats: undefined
+  FetchRunDistance: (user, start, end) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.findSomeExercises({ 'timestamps.start_date': { $gte: start, $lte: end }, owner: user }, {})
+        .then((exercises) => {
+          // map exercises to get [[{lat, lng}, ...], [...], ...]
+          const paths = exercises.map((ex) => {
+            return ex.path.map((p) => {
+              return { lat: p.coords.lat, lng: p.coords.lng }
+            })
+          })
+
+          // reduce paths down to just distances
+          let distance = 0
+          if (paths.length > 0) {
+            distance = paths.reduce((tot, path) => {
+              return tot + calculate.DistanceOfPath(path)
+            }, 0)
+          }
+          resolve({ ok: true, distance })
+        })
+        .catch(err => { console.log(err); reject(new Error(`Error finding exercises with params id[${user}] start[${start}] end[${end}]`)) })
+    })
+  }
 }

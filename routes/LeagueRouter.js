@@ -1,6 +1,10 @@
 const LeagueController = require('../Controllers/LeagueController')
 const express = require('express')
 
+const fetch = require('node-fetch')
+
+const taskCFG = require('../task.config')
+
 const OIDValidator = require('../type-validators/ObjectIdValidator')
 const StrValidator = require('../type-validators/StringValidator')
 const LLValidator = require('../type-validators/LeagueLengthValidator')
@@ -20,10 +24,11 @@ module.exports = () => {
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
     }
+
     // Check that the user is permitted to see it
     if (fetch.doc.creator !== req.user._id && // not creator
-        fetch.doc.participants.indexOf(req.user._id) === -1 && // not participant
-        fetch.doc.invited_users.indexOf(req.user._id) === -1 && // not invited
+        fetch.doc.participants.filter((x) => { return x._id.toString() === req.user._id }).length === 0 && // not participant
+        fetch.doc.invited_users.filter((x) => { return x._id.toString() === req.user._id }).length === 0 && // not invited
         fetch.doc.private === true) { // not public
       return res.status(401).json({ success: false, errors: { badauth: true } })
     }
@@ -68,10 +73,19 @@ module.exports = () => {
 
     // Create the league
     const result = await LeagueController.CreateLeague(title, creator, length).catch(err => next(err))
-    if (result.ok) {
-      return res.json({ success: true, league: result.doc })
+    if (!result.ok) {
+      return res.status(400).json({ success: false, errors: { league: result.errors } })
     }
-    return res.status(400).json({ success: false, errors: { league: result.errors } })
+
+    // Setup job
+    const url = `http://${taskCFG.url}/schedule-finish-league?lge=${result.doc._id}&ln=${length}&r=true`
+    const resp = await fetch(url, { method: 'POST' }).catch(err => next(err))
+    const data = await resp.json().catch(err => next(err))
+    if (!data.success) {
+      console.log('task creation failed')
+    }
+
+    return res.json({ success: true, league: result.doc })
   })
 
   router.delete('/', async (req, res, next) => {

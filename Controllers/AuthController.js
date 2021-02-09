@@ -88,7 +88,7 @@ module.exports = {
    */
   CreateUser: (email, name, plaintext) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneUser({ email: email })
+      module.exports.vars.findOneUser({ email: email }, {})
         .then((usr) => {
           if (usr === undefined || usr === null) {
             module.exports.vars.hashPassword(plaintext)
@@ -192,7 +192,10 @@ module.exports = {
             resolve({ ok: false, errors: { token: { invalid: true } } })
           }
         })
-        .catch(() => reject(new Error('Error decoding jwt')))
+        .catch(() => {
+          resolve({ ok: false, errors: { token: { invalid: true } } })
+          // reject(new Error(`Error decoding jwt: ${err}`))
+        })
     })
   }
 }

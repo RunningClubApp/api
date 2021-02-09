@@ -35,9 +35,10 @@ module.exports = {
           })
       })
     },
-    findOneLeague: (query) => {
+    findOneLeague: (query, opts) => {
       return new Promise((resolve, reject) => {
         League.findOne(query)
+          .populate(opts.populate)
           .exec((err, doc) => {
             if (err) {
               reject(err)
@@ -87,11 +88,13 @@ module.exports = {
         .then((l) => {
           module.exports.vars.saveLeague(l)
             .then(newdoc => resolve({ ok: true, doc: newdoc }))
-            .catch(() => {
+            .catch((err) => {
+              console.log(err)
               reject(new Error('Error saving league document'))
             })
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err)
           reject(new Error('Error validating league document'))
         })
     })
@@ -105,7 +108,7 @@ module.exports = {
    */
   FetchLeague: (id) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: id })
+      module.exports.vars.findOneLeague({ _id: id }, { populate: 'participants' })
         .then((doc) => {
           if (doc !== undefined) {
             resolve({ ok: true, doc })
@@ -147,7 +150,7 @@ module.exports = {
    */
   JoinLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.invited_users.indexOf(userID)
@@ -195,7 +198,7 @@ module.exports = {
    */
   InviteToLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.invited_users.indexOf(userID)
@@ -233,7 +236,7 @@ module.exports = {
    */
   LeaveLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.participants.indexOf(userID)
@@ -285,7 +288,7 @@ module.exports = {
    */
   UpdateLeague: (newLeague) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: newLeague._id })
+      module.exports.vars.findOneLeague({ _id: newLeague._id }, {})
         .then((doc) => {
           if (doc !== undefined) {
             for (const [k, v] of Object.entries(newLeague)) {

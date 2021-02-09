@@ -4,3 +4,6 @@
 [submodule "type-validators"]
 	path = type-validators
 	url = git@github.com:RunningClubApp/type-validators.git
+[submodule "distance-calculator"]
+	path = distance-calculator
+	url = git@github.com:RunningClubApp/distance-calculator.git
