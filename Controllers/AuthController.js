@@ -1,4 +1,4 @@
-const User = require('../Database/Models/User')
+const User = require('../mongo-database/Models/User')
 const cfg = require('../api.config')
 const bcrypt = require('bcrypt')
 const jwt = require('../bin/jwt')
@@ -31,6 +31,7 @@ function comparePasswords (plain, hash) {
   return new Promise((resolve, reject) => {
     bcrypt.compare(plain, hash, (err, result) => {
       if (err) {
+        console.log(err)
         reject(new Error('Error comparing passwords.'))
       } else {
         resolve(result)
@@ -49,15 +50,17 @@ module.exports = {
     rightNow: Date.now,
     encodeToken: jwt.IssueToken,
     decodeToken: jwt.VerifyToken,
-    findOneUser: (query) => {
+    findOneUser: (query, opts) => {
       return new Promise((resolve, reject) => {
-        User.findOne(query, (err, user) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(user)
-          }
-        })
+        User.findOne(query)
+          .select(opts.select)
+          .exec((err, user) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(user)
+            }
+          })
       })
     },
     saveUser: (user) => {
@@ -85,7 +88,7 @@ module.exports = {
    */
   CreateUser: (email, name, plaintext) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneUser({ email: email })
+      module.exports.vars.findOneUser({ email: email }, {})
         .then((usr) => {
           if (usr === undefined || usr === null) {
             module.exports.vars.hashPassword(plaintext)
@@ -130,7 +133,7 @@ module.exports = {
    */
   LoginUser: (email, password) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneUser({ email: email })
+      module.exports.vars.findOneUser({ email: email }, { select: '_id email name pass_hash' })
         .then((usr) => {
           if (usr !== undefined && usr !== null) {
             module.exports.vars.compPassword(password, usr.pass_hash)
@@ -189,7 +192,10 @@ module.exports = {
             resolve({ ok: false, errors: { token: { invalid: true } } })
           }
         })
-        .catch(() => reject(new Error('Error decoding jwt')))
+        .catch(() => {
+          resolve({ ok: false, errors: { token: { invalid: true } } })
+          // reject(new Error(`Error decoding jwt: ${err}`))
+        })
     })
   }
 }

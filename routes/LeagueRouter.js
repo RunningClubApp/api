@@ -1,10 +1,10 @@
 const LeagueController = require('../Controllers/LeagueController')
 const express = require('express')
 
-const OIDValidator = require('../Validators/ObjectIdValidator')
-const StrValidator = require('../Validators/StringValidator')
-const LLValidator = require('../Validators/LeagueLengthValidator')
-const BoolValidator = require('../Validators/BoolValidator')
+const OIDValidator = require('../type-validators/ObjectIdValidator')
+const StrValidator = require('../type-validators/StringValidator')
+const LLValidator = require('../type-validators/LeagueLengthValidator')
+const BoolValidator = require('../type-validators/BoolValidator')
 
 module.exports = () => {
   const router = express.Router()
@@ -20,15 +20,31 @@ module.exports = () => {
     if (!fetch.ok) {
       return res.status(400).json({ success: false, errors: { league: fetch.errors } })
     }
+
     // Check that the user is permitted to see it
     if (fetch.doc.creator !== req.user._id && // not creator
-        fetch.doc.participants.indexOf(req.user._id) === -1 && // not participant
-        fetch.doc.invited_users.indexOf(req.user._id) === -1 && // not invited
+        fetch.doc.participants.filter((x) => { return x._id.toString() === req.user._id }).length === 0 && // not participant
+        fetch.doc.invited_users.filter((x) => { return x._id.toString() === req.user._id }).length === 0 && // not invited
         fetch.doc.private === true) { // not public
       return res.status(401).json({ success: false, errors: { badauth: true } })
     }
 
     return res.json({ success: true, league: fetch.doc })
+  })
+
+  router.get('/foruser', async (req, res, next) => {
+    const user = req.user._id
+    const valid = OIDValidator(user)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { user: valid.errors } })
+    }
+
+    const fetch = await LeagueController.FetchLeaguesForUser(user).catch(err => next(err))
+    if (!fetch.ok) {
+      return res.status(400).json({ success: false, errors: { league: fetch.errors } })
+    }
+
+    return res.json({ success: true, leagues: fetch.docs })
   })
 
   router.post('/', async (req, res, next) => {
@@ -53,10 +69,15 @@ module.exports = () => {
 
     // Create the league
     const result = await LeagueController.CreateLeague(title, creator, length).catch(err => next(err))
-    if (result.ok) {
-      return res.json({ success: true, league: result.doc })
+    if (!result.ok) {
+      return res.status(400).json({ success: false, errors: { league: result.errors } })
     }
-    return res.status(400).json({ success: false, errors: { league: result.errors } })
+
+    const taskRes = await LeagueController.StartLeagueJobs(result.doc._id, length).catch(err => next(err))
+    if (!taskRes.data.success) {
+      return res.json({ success: true, league: result.doc, error: { job: { startfailed: true } } })
+    }
+    return res.json({ success: true, league: result.doc })
   })
 
   router.delete('/', async (req, res, next) => {

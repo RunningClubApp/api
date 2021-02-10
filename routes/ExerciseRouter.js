@@ -1,10 +1,10 @@
 const ExerciseController = require('../Controllers/ExerciseController')
 const express = require('express')
-const PathValidator = require('../Validators/PathValidator')
-const OIDValidator = require('../Validators/ObjectIdValidator')
-const DateValidator = require('../Validators/DateValidator')
-const IntValidator = require('../Validators/IntegerValidator')
-const KudosValidator = require('../Validators/KudosValidator')
+const PathValidator = require('../type-validators/PathValidator')
+const OIDValidator = require('../type-validators/ObjectIdValidator')
+const DateValidator = require('../type-validators/DateValidator')
+const IntValidator = require('../type-validators/IntegerValidator')
+const KudosValidator = require('../type-validators/KudosValidator')
 
 module.exports = () => {
   const router = express.Router()
@@ -171,6 +171,33 @@ module.exports = () => {
     const result = await ExerciseController.RemoveKudos(user, exercise).catch(err => next(err))
     if (result.ok) {
       return res.json({ success: true })
+    }
+    return res.status(400).json({ success: false, errors: result.errors })
+  })
+
+  router.get('/userdistance', async (req, res, next) => {
+    const user = req.query.uid
+    const start = req.query.s
+    const end = req.query.e
+
+    let valid = DateValidator(start)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { start: valid.errors } })
+    }
+
+    valid = DateValidator(end)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { end: valid.errors } })
+    }
+
+    valid = OIDValidator(user)
+    if (valid.err) {
+      return res.status(400).json({ success: false, errors: { user: valid.errors } })
+    }
+
+    const result = await ExerciseController.FetchRunDistance(user, start, end).catch(err => next(err))
+    if (result.ok) {
+      return res.json({ success: true, distance: result.distance })
     }
     return res.status(400).json({ success: false, errors: result.errors })
   })

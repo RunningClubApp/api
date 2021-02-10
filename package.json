@@ -19,6 +19,7 @@
     "mocha": "^8.2.1",
     "mongoose": "^5.11.10",
     "morgan": "^1.10.0",
+    "node-fetch": "^2.6.1",
     "sinon": "^9.2.3",
     "winston": "^3.0.0"
   },

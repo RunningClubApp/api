@@ -1,4 +1,6 @@
-const League = require('../Database/Models/League')
+const League = require('../mongo-database/Models/League')
+const fetch = require('node-fetch')
+const taskCFG = require('../task.config')
 
 /**
  * @module LeagueController
@@ -22,9 +24,10 @@ module.exports = {
           })
       })
     },
-    findSomeLeagues: (query) => {
+    findSomeLeagues: (query, opts) => {
       return new Promise((resolve, reject) => {
         League.find(query)
+          .populate(opts.populate)
           .exec((err, docs) => {
             if (err) {
               reject(err)
@@ -34,9 +37,10 @@ module.exports = {
           })
       })
     },
-    findOneLeague: (query) => {
+    findOneLeague: (query, opts) => {
       return new Promise((resolve, reject) => {
         League.findOne(query)
+          .populate(opts.populate)
           .exec((err, doc) => {
             if (err) {
               reject(err)
@@ -58,7 +62,18 @@ module.exports = {
           })
       })
     },
-    rightNow: () => { return Date.now() }
+    rightNow: () => { return Date.now() },
+    makeRequest: (host, route, body, method) => {
+      return new Promise((resolve, reject) => {
+        const url = `http://${host}/${route}`
+        fetch(url, { method, body })
+          .then(resp => resp.json())
+          .then((data) => {
+            resolve(data)
+          })
+          .catch(err => reject(err))
+      })
+    }
   },
 
   /**
@@ -75,8 +90,9 @@ module.exports = {
         creator: creator,
         participants: [creator],
         league_length: length,
+        league_start: module.exports.vars.rightNow(),
         timestamps: {
-          start_date: module.exports.vars.rightNow()
+          created_at: module.exports.vars.rightNow()
         },
         history: []
       }
@@ -85,11 +101,13 @@ module.exports = {
         .then((l) => {
           module.exports.vars.saveLeague(l)
             .then(newdoc => resolve({ ok: true, doc: newdoc }))
-            .catch(() => {
+            .catch((err) => {
+              console.log(err)
               reject(new Error('Error saving league document'))
             })
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err)
           reject(new Error('Error validating league document'))
         })
     })
@@ -103,7 +121,7 @@ module.exports = {
    */
   FetchLeague: (id) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: id })
+      module.exports.vars.findOneLeague({ _id: id }, { populate: 'participants' })
         .then((doc) => {
           if (doc !== undefined) {
             resolve({ ok: true, doc })
@@ -113,6 +131,23 @@ module.exports = {
         })
         .catch(() => {
           reject(new Error(`Error fetching league with id: ${id}`))
+        })
+    })
+  },
+
+  /**
+   * Fetches a league documents for a specified user
+   * @param {string} userid - The id of the user to fetch leagues for
+   * @return {Promise} Promise resolving with the newly inserted document
+   */
+  FetchLeaguesForUser: (userid) => {
+    return new Promise((resolve, reject) => {
+      module.exports.vars.findSomeLeagues({ participants: { $in: userid } }, { populate: 'participants' })
+        .then((docs) => {
+          resolve({ ok: true, docs })
+        })
+        .catch(() => {
+          reject(new Error(`Error fetching league with user ids: ${userid}`))
         })
     })
   },
@@ -128,7 +163,7 @@ module.exports = {
    */
   JoinLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.invited_users.indexOf(userID)
@@ -176,7 +211,7 @@ module.exports = {
    */
   InviteToLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.invited_users.indexOf(userID)
@@ -214,7 +249,7 @@ module.exports = {
    */
   LeaveLeague: (leagueID, userID) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: leagueID })
+      module.exports.vars.findOneLeague({ _id: leagueID }, {})
         .then((doc) => {
           if (doc !== undefined) {
             const index = doc.participants.indexOf(userID)
@@ -266,7 +301,7 @@ module.exports = {
    */
   UpdateLeague: (newLeague) => {
     return new Promise((resolve, reject) => {
-      module.exports.vars.findOneLeague({ _id: newLeague._id })
+      module.exports.vars.findOneLeague({ _id: newLeague._id }, {})
         .then((doc) => {
           if (doc !== undefined) {
             for (const [k, v] of Object.entries(newLeague)) {
@@ -287,6 +322,21 @@ module.exports = {
         .catch(() => {
           reject(new Error(`Error finding league with id ${newLeague._id}`))
         })
+    })
+  },
+  /**
+   * @param {String} leagueID The id of the league to start jobs for
+   * @param {String} leagueLength - The league length ['Weekly....etc]
+   */
+  StartLeagueJobs: (leagueID, leagueLength) => {
+    return new Promise((resolve, reject) => {
+      // Setup job
+      const route = `schedule-finish-league?lge=${leagueID}&ln=${leagueLength}&r=true`
+      module.exports.vars.makeRequest(taskCFG.url, route, {}, 'POST')
+        .then((data) => {
+          resolve({ data })
+        })
+        .catch(err => reject(err))
     })
   }
 }

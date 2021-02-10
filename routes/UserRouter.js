@@ -1,6 +1,6 @@
 const UserController = require('../Controllers/UserController')
 const express = require('express')
-const StrValidator = require('../Validators/StringValidator')
+const StrValidator = require('../type-validators/StringValidator')
 
 module.exports = () => {
   const router = express.Router()

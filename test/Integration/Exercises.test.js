@@ -523,3 +523,105 @@ describe('DELETE /exercise/kudos', () => {
     })
   })
 })
+
+describe('GET /exercise/userdistance', () => {
+  const tests = [
+    {name: 'Correctly calculates a distance',
+      query: {
+        uid: '4ff6440d15729b5df16823e3', s: isodate(2000, 0, 3, 0, 0, 0), e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 200,
+        result: { success: true, distance: 192256.928875065 }
+      }
+    },
+    {name: 'Correctly calculates a 0 distance',
+      query: {
+        uid: '5ff6440d15729b5df16823e3', s: isodate(2000, 0, 3, 0, 0, 0), e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 200,
+        result: { success: true, distance: 0 }
+      }
+    },
+    {name: 'Correctly calculates distance from two points',
+      query: {
+        uid: '6ff6440d15729b5df16823e3', s: isodate(2000, 0, 3, 0, 0, 0), e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 200,
+        result: { success: true, distance: 122464.03962382446 }
+      }
+    },
+    {name: 'Rejects when user id missing',
+      query: {
+        uid: '', s: isodate(2000, 0, 3, 0, 0, 0), e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { user: { invalid: true } } }
+      }
+    },
+    {name: 'Rejects when user id invalid',
+      query: {
+        uid: 'invalid', s: isodate(2000, 0, 3, 0, 0, 0), e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { user: { invalid: true } } }
+      }
+    },
+    {name: 'Rejects when start missing',
+      query: {
+        uid: '4ff6440d15729b5df16823e3', s: '', e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { start: { invalid: true } } }
+      }
+    },
+    {name: 'Rejects when start invalid',
+      query: {
+        uid: '4ff6440d15729b5df16823e3', s: 'invalid', e: isodate(2000, 0, 1, 0, 0, 0)
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { start: { invalid: true } } }
+      }
+    },
+    {name: 'Rejects when end missing',
+      query: {
+        uid: '4ff6440d15729b5df16823e3', s: isodate(2000, 0, 3, 0, 0, 0), e: ''
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { end: { invalid: true } } }
+      }
+    },
+    {name: 'Rejects when end invalid',
+      query: {
+        uid: '4ff6440d15729b5df16823e3', s: isodate(2000, 0, 3, 0, 0, 0), e: 'invalid'
+      },
+      want: {
+        code: 400,
+        result: { success: false, errors: { end: { invalid: true } } }
+      }
+    }
+  ]
+
+  tests.forEach((test) => {
+    it(test.name, (done) => {
+      afterEach(restoreDB)
+      chai
+        .request(app)
+        .get(`/exercise/userdistance?uid=${test.query.uid}&s=${test.query.s}&e=${test.query.e}`)
+        .send(test.body)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          res.should.have.status(test.want.code)
+          expect(res.body).excludingEvery(['_id']).to.deep.equal(test.want.result)
+          done()
+        })
+    })
+  })
+})

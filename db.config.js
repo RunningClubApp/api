@@ -1,5 +1,6 @@
 module.exports = {
-  url: 'localhost',
-  port: '27017',
-  db: 'running-club'
+  url: 'bm-cluster-0.27iwe.mongodb.net',
+  db: 'running-club',
+  user: 'RunningClub-User',
+  pwd: 'fjF2bvIZGXil6oLs'
 }
