@@ -32,7 +32,7 @@ const corsOptions = {
     // allow requests with no origin
     if (!origin) return callback(null, true)
     if (config.cors_whitelist.indexOf(origin) === -1) {
-      const message = `The CORS policy for this origin doesn\'t allow access from the origin[${origin}]`
+      const message = `The CORS policy for this origin doesn't allow access from the origin[${origin}]`
       return callback(new Error(message), false)
     }
     return callback(null, true)

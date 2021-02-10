@@ -66,13 +66,12 @@ module.exports = {
     makeRequest: (host, route, body, method) => {
       return new Promise((resolve, reject) => {
         const url = `http://${host}/${route}`
-        fetch(url, { method, body }).catch(err => next(err))
+        fetch(url, { method, body })
           .then(resp => resp.json())
           .then((data) => {
             resolve(data)
           })
           .catch(err => reject(err))
-        
       })
     }
   },
