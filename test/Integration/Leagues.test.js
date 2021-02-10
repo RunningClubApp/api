@@ -37,6 +37,12 @@ LeagueController.vars.deleteLeagueWithQuery = (q) => {
   })
 }
 
+LeagueController.vars.makeRequest = (h, r, n, m) => {
+  return new Promise((resolve, reject) => {
+    resolve({ success: true })
+  })
+}
+
 describe('GET /leagues', async () => {
   const tests = [
     {

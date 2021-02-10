@@ -1,10 +1,6 @@
 const LeagueController = require('../Controllers/LeagueController')
 const express = require('express')
 
-const fetch = require('node-fetch')
-
-const taskCFG = require('../task.config')
-
 const OIDValidator = require('../type-validators/ObjectIdValidator')
 const StrValidator = require('../type-validators/StringValidator')
 const LLValidator = require('../type-validators/LeagueLengthValidator')
@@ -77,14 +73,10 @@ module.exports = () => {
       return res.status(400).json({ success: false, errors: { league: result.errors } })
     }
 
-    // Setup job
-    const url = `http://${taskCFG.url}/schedule-finish-league?lge=${result.doc._id}&ln=${length}&r=true`
-    const resp = await fetch(url, { method: 'POST' }).catch(err => next(err))
-    const data = await resp.json().catch(err => next(err))
-    if (!data.success) {
-      console.log('task creation failed')
+    const taskRes = await LeagueController.StartLeagueJobs(result.doc._id, length).catch(err => next(err))
+    if (!taskRes.data.success) {
+      return res.json({ success: true, league: result.doc, error: { job: { startfailed: true } } })
     }
-
     return res.json({ success: true, league: result.doc })
   })
 

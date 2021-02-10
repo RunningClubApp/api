@@ -1,4 +1,6 @@
 const League = require('../mongo-database/Models/League')
+const fetch = require('node-fetch')
+const taskCFG = require('../task.config')
 
 /**
  * @module LeagueController
@@ -60,7 +62,19 @@ module.exports = {
           })
       })
     },
-    rightNow: () => { return Date.now() }
+    rightNow: () => { return Date.now() },
+    makeRequest: (host, route, body, method) => {
+      return new Promise((resolve, reject) => {
+        const url = `http://${host}/${route}`
+        fetch(url, { method, body }).catch(err => next(err))
+          .then(resp => resp.json())
+          .then((data) => {
+            resolve(data)
+          })
+          .catch(err => reject(err))
+        
+      })
+    }
   },
 
   /**
@@ -309,6 +323,21 @@ module.exports = {
         .catch(() => {
           reject(new Error(`Error finding league with id ${newLeague._id}`))
         })
+    })
+  },
+  /**
+   * @param {String} leagueID The id of the league to start jobs for
+   * @param {String} leagueLength - The league length ['Weekly....etc]
+   */
+  StartLeagueJobs: (leagueID, leagueLength) => {
+    return new Promise((resolve, reject) => {
+      // Setup job
+      const route = `schedule-finish-league?lge=${leagueID}&ln=${leagueLength}&r=true`
+      module.exports.vars.makeRequest(taskCFG.url, route, {}, 'POST')
+        .then((data) => {
+          resolve({ data })
+        })
+        .catch(err => reject(err))
     })
   }
 }
